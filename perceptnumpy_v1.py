@@ -1,10 +1,8 @@
 #! /usr/bin/env python3.4
 # -*- encoding: utf-8 -*-
 
-
 import random as r
 import numpy as np
-
 
 def randper(bign):
     cnt = 0
@@ -14,27 +12,13 @@ def randper(bign):
     np.random.seed(1)
     r.seed(1)
 
-    # arrays for the simulated dataset
-    # x = np.zeros((bign, 2))
-    # # add column of ones
-    # x = np.column_stack((np.ones((bign, 1)), x))
-    # y = np.zeros((bign))
-
-    # arrays for the simulated cross-validation dataset
-    #
-    # x_cross = np.zeros((crossn, 2))
-    # y_cross = np.zeros((crossn))
-    # # next, add the ones
-    # x_cross = np.column_stack((np.ones((crossn, 1)), x_cross))
-
     for k in range(runs):
         fa = (r.uniform(-1, 1), r.uniform(-1, 1))
         fb = (r.uniform(-1, 1), r.uniform(-1, 1))
         slope = (fb[1] - fa[1]) / (fb[0] - fa[0])
         intercept = fb[1] - fb[0] * slope
 
-        # created the simulated dataset
-
+        # create the simulated dataset
         x = 2.0 * np.random.rand(bign, 2) - 1.0
         fx = slope * x[:, 0] + intercept          # this is slow: scalar ops with vector
         y = np.where(x[:, 1] >= fx, 1.0, -1.0)
@@ -50,48 +34,35 @@ def randper(bign):
 
         # perform pla to determine g
         while True:
-        # for i in [1,2,3]:
-            # misclassified = []
-            # for i in range(bign):
-            #     if (y[i] < 0) != (h[i] < 0) or h[i] == 0:
-            #         misclassified.append(i)
-            misclassified = np.argwhere((np.where(y < 0, 1, -1) * np.where(h < 0, 1, -1)
-                                         + np.where(h == 0, -1, 0)) <= 0)
-            # print(test)
-            # print(misclassified)
-                #                         or
-                # np.where(h == 0,1,0))
-            # print "no. misclassified", len(misclassified)
-            # print misclassified
+            misclassified = np.argwhere((np.where(y < 0.0, 1, -1) * np.where(h < 0.0, 1, -1)
+                                         + np.where(h == 0.0, -1, 0)) <= 0)
             if len(misclassified) == 0:
                 break
             else:
                 cnt += 1
                 pick = r.randint(0, len(misclassified) - 1)
-                # print "first pick", pick
                 pick = misclassified[pick][0]
-                # print "actual pick", pick
 
-                # print "calc new weights"
+                # calc new weights and new hypothesis value
                 w[0] += y[pick]
                 w[1] += y[pick] * x[pick][1]
                 w[2] += y[pick] * x[pick][2]
-                h[pick] = sum((w[0] * 1.0, w[1] * x[pick][1], w[2] * x[pick][2]))
+                h[pick] = x[pick].dot(w)
 
         # simulate a cross-validation set
         # evaluate g on a different set of points than those used to estimate g
         x_cross = 2.0 * np.random.rand(crossn, 2) - 1.0
         fx = slope * x_cross[:, 0] + intercept
-        y_cross = np.where(x_cross[:, 1] >= fx, 1.0, -1.0)
+        y_cross = np.where(x_cross[:, 1] >= fx, 1, -1)
         # next, add the ones
         x_cross = np.column_stack((np.ones((crossn, 1)), x_cross))
         h_cross = x_cross.dot(w)  # vectorized
 
-        yless0 = np.where(y_cross < 0, 1, 0)
-        hless0 = np.where(h_cross < 0, 1, 0)
-        heq0 = np.where(h_cross == 0, 1, 0)
-        ne = np.where(yless0 != hless0,1,0)
-        disagree += np.sum(np.where(heq0 + ne > 0,1,0))
+        yless0 = np.where(y_cross < 0.0, 1, 0)
+        hless0 = np.where(h_cross < 0.0, 1, 0)
+        heq0 = np.where(h_cross == 0.0, 1, 0)
+        ne = np.where(yless0 != hless0, 1, 0)
+        disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
 
