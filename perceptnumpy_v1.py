@@ -46,17 +46,19 @@ def randper(bign):
         # initial pla hypothesis with weights equal 0
         w = np.array([0.0, 0.0, 0.0])
         h = x.dot(w)  # vectorized
-        # print h
+        # print (h)
 
         # perform pla to determine g
         while True:
+        # for i in [1,2,3]:
             # misclassified = []
             # for i in range(bign):
             #     if (y[i] < 0) != (h[i] < 0) or h[i] == 0:
             #         misclassified.append(i)
-            test = np.argwhere(np.where(y < 0,1,0) != np.where(h<0,1,0) )
-            misclassified = np.argwhere(np.where(y < 0,1,0) != np.where(h<0,1,0) )
-            print(misclassified)
+            misclassified = np.argwhere((np.where(y < 0, 1, -1) * np.where(h < 0, 1, -1)
+                                         + np.where(h == 0, -1, 0)) <= 0)
+            # print(test)
+            # print(misclassified)
                 #                         or
                 # np.where(h == 0,1,0))
             # print "no. misclassified", len(misclassified)
@@ -67,7 +69,7 @@ def randper(bign):
                 cnt += 1
                 pick = r.randint(0, len(misclassified) - 1)
                 # print "first pick", pick
-                pick = misclassified[pick]
+                pick = misclassified[pick][0]
                 # print "actual pick", pick
 
                 # print "calc new weights"
@@ -77,6 +79,7 @@ def randper(bign):
                 h[pick] = sum((w[0] * 1.0, w[1] * x[pick][1], w[2] * x[pick][2]))
 
         # simulate a cross-validation set
+        # evaluate g on a different set of points than those used to estimate g
         x_cross = 2.0 * np.random.rand(crossn, 2) - 1.0
         fx = slope * x_cross[:, 0] + intercept
         y_cross = np.where(x_cross[:, 1] >= fx, 1.0, -1.0)
@@ -92,4 +95,4 @@ def randper(bign):
 
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
 
-    # evaluate g on a different set of points than those used to estimate g
+
