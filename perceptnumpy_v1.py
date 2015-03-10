@@ -4,6 +4,7 @@
 import random as r
 import numpy as np
 
+
 def randper(bign):
     cnt = 0
     disagree = 0
@@ -65,5 +66,3 @@ def randper(bign):
         disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
-
-
