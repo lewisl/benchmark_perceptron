@@ -17,61 +17,76 @@ def randper(bign):
     slope = (fb[:, 1] - fa[:, 1]) / (fb[:, 0] - fa[:, 0])   # runs
     intercept = fb[:, 1] - fb[:, 0] * slope       # runs
 
-    print("fa shape: ", fa.shape)
-    print("fb shape: ", fb.shape)
-    print("slope shape: ", slope.shape)
-    print("intercept shape: ", intercept.shape)
+    # print('{0:18} {1}'.format("fa shape: ", fa.shape))
+    # print('{0:18} {1}'.format("fb shape: ", fb.shape))
+    # print('{0:18} {1}'.format("slope shape: ", slope.shape))
+    # print('{0:18} {1}'.format("intercept shape: ", intercept.shape))
 
     # create the simulated dataset
     x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2
     fx = (np.repeat(slope[:, np.newaxis], bign, 1) * x[:, :, 0]
           + np.repeat(intercept[:, np.newaxis], bign, 1))          # runs, bign
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
-
-    print("x shape: ", x.shape)
-    print("fx shape: ", fx.shape)
-    print("y shape: ", y.shape)
+    #
+    # print('{0:18} {1}'.format("x shape: ", x.shape))
+    # print('{0:18} {1}'.format("fx shape: ", fx.shape))
+    # print('{0:18} {1}'.format("y shape: ", y.shape))
 
     # add column of ones
     x = np.concatenate((x, np.ones((runs, bign, 1))), axis=2)  # runs, bign, 3
-    print("new x shape: ", x.shape)
+    # print('{0:18} {1}'.format("new x shape: ", x.shape))
 
     # Calculate PLA hypothesis values
     # initial pla hypothesis with weights equal 0
-    w = np.array([0.0, 0.0, 0.0])
-    h = x[:,].dot(w)                        # runs, bign
-    print("h shape: ", h.shape)
+    w = np.zeros((runs,3))  # need a different w per run
+    h = x[:,].dot(w[0])   # fix with einsum                     TODO
+    # print('{0:18} {1}'.format("h shape: ", h.shape))
     #
-    # # perform pla to determine g
-    # while True:
-    #     misclassified = np.argwhere((np.where(y < 0.0, 1, -1)   # runs by variable
-    #         * np.where(h < 0.0, 1, -1) + np.where(h == 0.0, -1, 0)) <= 0)
-    #     if len(misclassified) == 0:
-    #         break
-    #     else:
-    #         cnt += 1
-    #         pick = r.randint(0, len(misclassified) - 1)
-    #         pick = misclassified[pick][0]
-    #
-    #         # calc new weights and new hypothesis value
-    #         w[0] += y[pick]
-    #         w[1] += y[pick] * x[pick][1]
-    #         w[2] += y[pick] * x[pick][2]
-    #         h[pick] = x[pick].dot(w)
-    #
-    # # simulate a cross-validation set  -- set up matrices as above
-    # # evaluate g on a different set of points than those used to estimate g
-    # x_cross = 2.0 * np.random.rand(crossn, 2) - 1.0     # runs, crossn, 2
-    # fx = slope * x_cross[:, 0] + intercept              # 1 x runs
-    # y_cross = np.where(x_cross[:, 1] >= fx, 1, -1)      # runs, crossn, 1
+    # perform pla to determine g
+    for k in range(runs):
+        while True:
+            misclassified = np.argwhere((np.where(y[k] < 0.0, 1, -1)   # runs by variable
+                * np.where(h[k] < 0.0, 1, -1) + np.where(h[k] == 0.0, -1, 0)) <= 0)
+            if len(misclassified) == 0:
+                break
+            else:
+                cnt += 1
+                # pick = r.randint(0, len(misclassified) - 1)  # randomized choise of misc. point
+                # pick = misclassified[pick][0]                # ditto
+                pick = misclassified[len(misclassified) - 1][0]
+
+                # calc new weights and new hypothesis value
+                w[k, 0] += y[k, pick]
+                w[k, 1] += y[k, pick] * x[k, pick][1]
+                w[k, 2] += y[k, pick] * x[k, pick][2]
+                h[k][pick] = x[k][pick].dot(w[k])          # runs,3
+
+    # print('{0:18} {1}'.format("w shape: ", w.shape))
+
+    # simulate a cross-validation set  -- set up matrices as above
+    # evaluate g on a different set of points than those used to estimate g
+    x_cross = 2.0 * np.random.rand(runs, crossn, 2) - 1.0     # runs, crossn, 2
+    fx = (np.repeat(slope[:, np.newaxis], crossn, 1) * x_cross[:, :, 0]
+          + np.repeat(intercept[:, np.newaxis], crossn, 1))          # runs, crossn
+    y_cross = np.where(x_cross[:, :, 1] >= fx, 1.0, -1.0)    # runs, crossn
     # # next, add the ones
-    # x_cross = np.column_stack((np.ones((crossn, 1)), x_cross))  # runs, crossn, 3
-    # h_cross = x_cross.dot(w)                                    # runs, crossn, 1
-    #
-    # yless0 = np.where(y_cross < 0.0, 1, 0)      # runs, crossn
-    # hless0 = np.where(h_cross < 0.0, 1, 0)
-    # heq0 = np.where(h_cross == 0.0, 1, 0)
-    # ne = np.where(yless0 != hless0, 1, 0)
-    # disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
-    #
-    # print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
+    x_cross = np.concatenate((x_cross, np.ones((runs, crossn, 1))), axis=2)  # runs, crossn, 3
+    h_cross = np.einsum("ijk, ik -> ij", x_cross, w)   # runs, crossn
+
+    # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
+    # print('{0:18} {1}'.format("fx shape: ", fx.shape))
+    # print('{0:18} {1}'.format("y_cross shape: ", y_cross.shape))
+    # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
+    # print('{0:18} {1}'.format("h_cross shape: ", h_cross.shape))
+
+
+    yless0 = np.where(y_cross < 0.0, 1, 0)      # runs, crossn
+    hless0 = np.where(h_cross < 0.0, 1, 0)
+    heq0 = np.where(h_cross == 0.0, 1, 0)
+    ne = np.where(yless0 != hless0, 1, 0)
+
+    # print('{0:18} {1}'.format("yless0_cross shape: ", yless0.shape))
+
+    disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
+
+    print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
