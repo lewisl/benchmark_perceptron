@@ -43,10 +43,11 @@ def randper(bign=10):
             if len(misclassified) == 0:
                 break
             else:
-                cnt+=1
-                pick = r.randint(0,len(misclassified)-1)  # what happens if not randomly chosen?
+                cnt += 1
+                # pick = r.randint(0,len(misclassified)-1)   # randomly chosen point
                 # print "first pick", pick
-                pick = misclassified[pick]
+                pick = misclassified[len(misclassified) - 1]  # faster if not randomly chosen
+                # pick = misclassified[pick]  # use randomly selected misclassified point
                 # print "actual pick", pick
 
                 # print "calc new weights"

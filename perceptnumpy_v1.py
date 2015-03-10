@@ -41,8 +41,8 @@ def randper(bign):
                 break
             else:
                 cnt += 1
-                pick = r.randint(0, len(misclassified) - 1)
-                pick = misclassified[pick][0]
+                # pick = r.randint(0, len(misclassified) - 1)
+                pick = misclassified[len(misclassified) - 1][0]
 
                 # calc new weights and new hypothesis value
                 w[0] += y[pick]
