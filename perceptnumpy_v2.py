@@ -11,14 +11,11 @@ def randper(bign):
     runs = 1000
     crossn = 10 * bign
     np.random.seed(1)
-    r.seed(1)
 
-    # fa = (r.uniform(-1, 1), r.uniform(-1, 1))   # runs x 2
     fa = np.random.uniform(-1, 1, (runs, 2))
-    # fb = (r.uniform(-1, 1), r.uniform(-1, 1))
     fb = np.random.uniform(-1, 1, (runs, 2))
     slope = (fb[:, 1] - fa[:, 1]) / (fb[:, 0] - fa[:, 0])   # runs
-    intercept = fb[:, 1] - fb[:, 0] * slope
+    intercept = fb[:, 1] - fb[:, 0] * slope       # runs
 
     print("fa shape: ", fa.shape)
     print("fb shape: ", fb.shape)
@@ -27,8 +24,8 @@ def randper(bign):
 
     # create the simulated dataset
     x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2
-    fx = (np.repeat(slope[:,np.newaxis],bign,1) * x[:, :, 0]
-          + np.repeat(intercept[:,np.newaxis], bign, 1))          # runs, bign
+    fx = (np.repeat(slope[:, np.newaxis], bign, 1) * x[:, :, 0]
+          + np.repeat(intercept[:, np.newaxis], bign, 1))          # runs, bign
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
 
     print("x shape: ", x.shape)
@@ -62,7 +59,7 @@ def randper(bign):
     #         w[2] += y[pick] * x[pick][2]
     #         h[pick] = x[pick].dot(w)
     #
-    # # simulate a cross-validation set
+    # # simulate a cross-validation set  -- set up matrices as above
     # # evaluate g on a different set of points than those used to estimate g
     # x_cross = 2.0 * np.random.rand(crossn, 2) - 1.0     # runs, crossn, 2
     # fx = slope * x_cross[:, 0] + intercept              # 1 x runs

@@ -44,7 +44,7 @@ def randper(bign=10):
                 break
             else:
                 cnt+=1
-                pick = r.randint(0,len(misclassified)-1)
+                pick = r.randint(0,len(misclassified)-1)  # what happens if not randomly chosen?
                 # print "first pick", pick
                 pick = misclassified[pick]
                 # print "actual pick", pick
