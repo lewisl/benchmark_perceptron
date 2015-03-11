@@ -8,7 +8,7 @@ import numpy as np
 def randper(bign):
     cnt = 0
     disagree = 0
-    runs = 1000
+    runs = 20  # 1000
     crossn = 10 * bign
     np.random.seed(1)
 
@@ -16,6 +16,9 @@ def randper(bign):
     fb = np.random.uniform(-1, 1, (runs, 2))
     slope = (fb[:, 1] - fa[:, 1]) / (fb[:, 0] - fa[:, 0])   # runs
     intercept = fb[:, 1] - fb[:, 0] * slope       # runs
+
+    # print("slope: \n", slope)
+    # print("intercept: \n", intercept)
 
     # print('{0:18} {1}'.format("fa shape: ", fa.shape))
     # print('{0:18} {1}'.format("fb shape: ", fb.shape))
@@ -28,6 +31,7 @@ def randper(bign):
           + np.repeat(intercept[:, np.newaxis], bign, 1))          # runs, bign
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
     #
+    # print("fx: ", fx)
     # print('{0:18} {1}'.format("x shape: ", x.shape))
     # print('{0:18} {1}'.format("fx shape: ", fx.shape))
     # print('{0:18} {1}'.format("y shape: ", y.shape))
@@ -39,7 +43,9 @@ def randper(bign):
     # Calculate PLA hypothesis values
     # initial pla hypothesis with weights equal 0
     w = np.zeros((runs,3))  # need a different w per run
-    h = x[:,].dot(w[0])   # fix with einsum                     TODO
+    h = np.einsum("ijk, ik -> ij", x, w)   # x[:,].dot(w[0])   # fix with einsum   TODO
+
+    # print("h: ", h)
     # print('{0:18} {1}'.format("h shape: ", h.shape))
     #
     # perform pla to determine g
@@ -61,6 +67,7 @@ def randper(bign):
                 w[k, 2] += y[k, pick] * x[k, pick][2]
                 h[k][pick] = x[k][pick].dot(w[k])          # runs,3
 
+    # print("w: ", w)
     # print('{0:18} {1}'.format("w shape: ", w.shape))
 
     # simulate a cross-validation set  -- set up matrices as above
@@ -89,4 +96,5 @@ def randper(bign):
 
     disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
+    print("cnt: ", cnt, " disagree: ", disagree)
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))

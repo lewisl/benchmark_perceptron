@@ -1,28 +1,31 @@
 #! /usr/bin/env python3.4
 # -*- encoding: utf-8 -*-
 
-import random as r
 import numpy as np
 
 
 def randper(bign):
     cnt = 0
     disagree = 0
-    runs = 1000
+    runs = 20  # 1000
     crossn = 10 * bign
     np.random.seed(1)
-    r.seed(1)
 
     for k in range(runs):
-        fa = (r.uniform(-1, 1), r.uniform(-1, 1))
-        fb = (r.uniform(-1, 1), r.uniform(-1, 1))
+        fa = np.random.uniform(-1, 1, 2)  # (r.uniform(-1, 1), r.uniform(-1, 1))
+        fb = np.random.uniform(-1, 1, 2)  # (r.uniform(-1, 1), r.uniform(-1, 1))
         slope = (fb[1] - fa[1]) / (fb[0] - fa[0])
         intercept = fb[1] - fb[0] * slope
+
+        # print("slope: \n", slope)
+        # print("intercept: \n", intercept)
 
         # create the simulated dataset
         x = 2.0 * np.random.rand(bign, 2) - 1.0
         fx = slope * x[:, 0] + intercept          # this is slow: scalar ops with vector
         y = np.where(x[:, 1] >= fx, 1.0, -1.0)
+
+        # print("fx: ", fx)
 
         # add column of ones
         x = np.column_stack((np.ones((bign, 1)), x))
@@ -31,7 +34,7 @@ def randper(bign):
         # initial pla hypothesis with weights equal 0
         w = np.array([0.0, 0.0, 0.0])
         h = x.dot(w)  # vectorized
-        # print (h)
+        # print("h: ", h)
 
         # perform pla to determine g
         while True:
@@ -50,6 +53,7 @@ def randper(bign):
                 w[2] += y[pick] * x[pick][2]
                 h[pick] = x[pick].dot(w)
 
+        # print("w: ", w)
         # simulate a cross-validation set
         # evaluate g on a different set of points than those used to estimate g
         x_cross = 2.0 * np.random.rand(crossn, 2) - 1.0
@@ -65,4 +69,5 @@ def randper(bign):
         ne = np.where(yless0 != hless0, 1, 0)
         disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
+    print("cnt: ", cnt, " disagree: ", disagree)
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
