@@ -3,11 +3,10 @@
 
 import numpy as np
 
-
 def randper(bign):
     cnt = 0
     disagree = 0
-    runs = 20  # 1000
+    runs = 1000
     crossn = 10 * bign
     np.random.seed(1)
 
@@ -26,9 +25,10 @@ def randper(bign):
         y = np.where(x[:, 1] >= fx, 1.0, -1.0)
 
         # print("fx: ", fx)
-
+        # print("y: ", y)
         # add column of ones
         x = np.column_stack((np.ones((bign, 1)), x))
+        # print("first 5 runs for x\n",x[0:5])
 
         # Calculate PLA hypothesis values
         # initial pla hypothesis with weights equal 0

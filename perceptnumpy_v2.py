@@ -1,14 +1,12 @@
 #! /usr/bin/env python3.4
 # -*- encoding: utf-8 -*-
 
-import random as r
 import numpy as np
-
 
 def randper(bign):
     cnt = 0
     disagree = 0
-    runs = 20  # 1000
+    runs = 1000
     crossn = 10 * bign
     np.random.seed(1)
 
@@ -32,18 +30,20 @@ def randper(bign):
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
     #
     # print("fx: ", fx)
+    # print("y: ", y)
     # print('{0:18} {1}'.format("x shape: ", x.shape))
     # print('{0:18} {1}'.format("fx shape: ", fx.shape))
     # print('{0:18} {1}'.format("y shape: ", y.shape))
 
     # add column of ones
-    x = np.concatenate((x, np.ones((runs, bign, 1))), axis=2)  # runs, bign, 3
+    x = np.concatenate((np.ones((runs, bign, 1)), x), axis=2)  # runs, bign, 3
     # print('{0:18} {1}'.format("new x shape: ", x.shape))
+    # print("first 5 runs for x\n",x[0:5])
 
     # Calculate PLA hypothesis values
     # initial pla hypothesis with weights equal 0
-    w = np.zeros((runs,3))  # need a different w per run
-    h = np.einsum("ijk, ik -> ij", x, w)   # x[:,].dot(w[0])   # fix with einsum   TODO
+    w = np.zeros((runs, 3))  # need a different w per run
+    h = np.einsum("ijk, ik -> ij", x, w)  # runs, bign 3  ;  runs, 3  -> runs, bign
 
     # print("h: ", h)
     # print('{0:18} {1}'.format("h shape: ", h.shape))
@@ -65,7 +65,7 @@ def randper(bign):
                 w[k, 0] += y[k, pick]
                 w[k, 1] += y[k, pick] * x[k, pick][1]
                 w[k, 2] += y[k, pick] * x[k, pick][2]
-                h[k][pick] = x[k][pick].dot(w[k])          # runs,3
+                h[k][pick] = x[k][pick].dot(w[k])
 
     # print("w: ", w)
     # print('{0:18} {1}'.format("w shape: ", w.shape))
@@ -77,7 +77,9 @@ def randper(bign):
           + np.repeat(intercept[:, np.newaxis], crossn, 1))          # runs, crossn
     y_cross = np.where(x_cross[:, :, 1] >= fx, 1.0, -1.0)    # runs, crossn
     # # next, add the ones
-    x_cross = np.concatenate((x_cross, np.ones((runs, crossn, 1))), axis=2)  # runs, crossn, 3
+    x_cross = np.concatenate((np.ones((runs, crossn, 1)), x_cross), axis=2)  # runs, crossn, 3
+    # print("\nfirst 5 runs for x_cross\n",x[0:5])
+
     h_cross = np.einsum("ijk, ik -> ij", x_cross, w)   # runs, crossn
 
     # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
@@ -85,7 +87,6 @@ def randper(bign):
     # print('{0:18} {1}'.format("y_cross shape: ", y_cross.shape))
     # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
     # print('{0:18} {1}'.format("h_cross shape: ", h_cross.shape))
-
 
     yless0 = np.where(y_cross < 0.0, 1, 0)      # runs, crossn
     hless0 = np.where(h_cross < 0.0, 1, 0)
