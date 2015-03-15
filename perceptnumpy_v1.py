@@ -3,6 +3,7 @@
 
 import numpy as np
 
+
 def randper(bign):
     cnt = 0
     disagree = 0

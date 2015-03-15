@@ -3,6 +3,7 @@
 
 import numpy as np
 
+
 def randper(bign):
     cnt = 0
     disagree = 0
@@ -24,7 +25,7 @@ def randper(bign):
     # print('{0:18} {1}'.format("intercept shape: ", intercept.shape))
 
     # create the simulated dataset
-    x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2  Allocate once?  TODO
+    x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2
     fx = (np.repeat(slope[:, np.newaxis], bign, 1) * x[:, :, 0]
           + np.repeat(intercept[:, np.newaxis], bign, 1))          # runs, bign
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
@@ -72,7 +73,7 @@ def randper(bign):
 
     # simulate a cross-validation set  -- set up matrices as above
     # evaluate g on a different set of points than those used to estimate g
-    x_cross = 2.0 * np.random.rand(runs, crossn, 2) - 1.0  # runs, crossn, 2   Allocate Once?  TODO
+    x_cross = 2.0 * np.random.rand(runs, crossn, 2) - 1.0  # runs, crossn, 2
     fx = (np.repeat(slope[:, np.newaxis], crossn, 1) * x_cross[:, :, 0]
           + np.repeat(intercept[:, np.newaxis], crossn, 1))          # runs, crossn
     y_cross = np.where(x_cross[:, :, 1] >= fx, 1, -1)    # runs, crossn
@@ -88,7 +89,7 @@ def randper(bign):
     # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
     # print('{0:18} {1}'.format("h_cross shape: ", h_cross.shape))
 
-    yless0 = np.where(y_cross < 0, 1, 0)      # runs, crossn    Faster way??  TODO
+    yless0 = np.where(y_cross < 0, 1, 0)      # runs, crossn
     hless0 = np.where(h_cross < 0.0, 1, 0)
     heq0 = np.where(h_cross == 0.0, 1, 0)
     ne = np.where(yless0 != hless0, 1, 0)
