@@ -2,9 +2,10 @@
 # -*- encoding: utf-8 -*-
 
 import random as r
-import sys
+
 
 def randper(bign=10):
+    global crossn
     cnt = 0
     disagree = 0
     runs = 1000
@@ -19,16 +20,16 @@ def randper(bign=10):
         x = []
         y = []
         for i in range(bign):
-            x.append(  (r.uniform(-1, 1), r.uniform(-1, 1))  )
+            x.append((r.uniform(-1, 1), r.uniform(-1, 1)))
             fx = slope * x[i][0] + intercept
-            y.append( 1.0 if x[i][1] >= fx  else -1.0)
+            y.append(1.0 if x[i][1] >= fx else -1.0)
             # print x[i], fx, y[i]
 
         # initial pla hypothesis with weights equal 0
         w = [0.0, 0.0, 0.0]
         h = []
         for i in range(bign):
-            h.append(  sum( (w[0] * 1, w[1] * x[i][0], w[2] * x[i][1]) )  )
+            h.append(sum((w[0] * 1, w[1] * x[i][0], w[2] * x[i][1])))
             # print i, y[i], h[i]
         # print h
 
@@ -54,21 +55,21 @@ def randper(bign=10):
                 w[0] += y[pick]
                 w[1] += y[pick] * x[pick][0]
                 w[2] += y[pick] * x[pick][1]
-                h[pick] = sum( (w[0] * 1, w[1] * x[pick][0], w[2] * x[pick][1]) )
+                h[pick] = sum((w[0] * 1, w[1] * x[pick][0], w[2] * x[pick][1]))
 
         # simulate a cross-validation set
         x = []
         y = []
         crossn = 10 * bign
         for i in range(crossn):
-            x.append(  (r.uniform(-1,1), r.uniform(-1,1))  )
+            x.append((r.uniform(-1, 1), r.uniform(-1, 1)))
             fx = slope * x[i][0] + intercept
             y.append(1.0 if x[i][1] >= fx else -1.0)
 
         # calculate hypothesis for cross validation set
         h = []
         for i in range(crossn):
-            h.append(  sum( (w[0]*1.0, w[1]*x[i][0], w[2]*x[i][1]) )  )
+            h.append(  sum((w[0] * 1.0, w[1] * x[i][0], w[2] * x[i][1])))
 
         # disagree = 0
         for i in range(crossn):
@@ -78,12 +79,4 @@ def randper(bign=10):
         # disagreepct += float(disagree)/float(bign)
         # print disagreepct
 
-    print (float(cnt)/float(runs), float(disagree)/(float(runs)*float(crossn)))
-
-if __name__ == '__main__':
-    try:
-        randper(int(sys.argv[1]))
-    except:
-        randper()
-
-    # evaluate g on a different set of points than those used to estimate g
+    print(float(cnt) / float(runs), float(disagree) / (float(runs) * float(crossn)))
