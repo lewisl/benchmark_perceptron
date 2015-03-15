@@ -69,5 +69,5 @@ def randper(bign):
         ne = np.where(yless0 != hless0, 1, 0)
         disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
-    print("cnt: ", cnt, " disagree: ", disagree)
+    # print("cnt: ", cnt, " disagree: ", disagree)
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))

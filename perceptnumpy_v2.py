@@ -24,7 +24,7 @@ def randper(bign):
     # print('{0:18} {1}'.format("intercept shape: ", intercept.shape))
 
     # create the simulated dataset
-    x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2
+    x = 2.0 * np.random.rand(runs, bign, 2) - 1.0     # runs,bign,2  Allocate once?  TODO
     fx = (np.repeat(slope[:, np.newaxis], bign, 1) * x[:, :, 0]
           + np.repeat(intercept[:, np.newaxis], bign, 1))          # runs, bign
     y = np.where(x[:, :, 1] >= fx, 1.0, -1.0)    # runs, bign
@@ -72,10 +72,10 @@ def randper(bign):
 
     # simulate a cross-validation set  -- set up matrices as above
     # evaluate g on a different set of points than those used to estimate g
-    x_cross = 2.0 * np.random.rand(runs, crossn, 2) - 1.0     # runs, crossn, 2
+    x_cross = 2.0 * np.random.rand(runs, crossn, 2) - 1.0  # runs, crossn, 2   Allocate Once?  TODO
     fx = (np.repeat(slope[:, np.newaxis], crossn, 1) * x_cross[:, :, 0]
           + np.repeat(intercept[:, np.newaxis], crossn, 1))          # runs, crossn
-    y_cross = np.where(x_cross[:, :, 1] >= fx, 1.0, -1.0)    # runs, crossn
+    y_cross = np.where(x_cross[:, :, 1] >= fx, 1, -1)    # runs, crossn
     # # next, add the ones
     x_cross = np.concatenate((np.ones((runs, crossn, 1)), x_cross), axis=2)  # runs, crossn, 3
     # print("\nfirst 5 runs for x_cross\n",x[0:5])
@@ -88,7 +88,7 @@ def randper(bign):
     # print('{0:18} {1}'.format("x_cross shape: ", x_cross.shape))
     # print('{0:18} {1}'.format("h_cross shape: ", h_cross.shape))
 
-    yless0 = np.where(y_cross < 0.0, 1, 0)      # runs, crossn
+    yless0 = np.where(y_cross < 0, 1, 0)      # runs, crossn    Faster way??  TODO
     hless0 = np.where(h_cross < 0.0, 1, 0)
     heq0 = np.where(h_cross == 0.0, 1, 0)
     ne = np.where(yless0 != hless0, 1, 0)
@@ -97,5 +97,5 @@ def randper(bign):
 
     disagree += np.sum(np.where(heq0 + ne > 0, 1, 0))
 
-    print("cnt: ", cnt, " disagree: ", disagree)
+    # print("cnt: ", cnt, " disagree: ", disagree)
     print(float(cnt) / float(runs), disagree / (float(runs) * float(crossn)))
