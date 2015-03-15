@@ -27,7 +27,7 @@ def randper(bign):
         # print("fx: ", fx)
         # print("y: ", y)
         # add column of ones
-        x = np.column_stack((np.ones((bign, 1)), x))
+        x = np.concatenate((np.ones((bign, 1)), x), axis=1)
         # print("first 5 runs for x\n",x[0:5])
 
         # Calculate PLA hypothesis values
@@ -60,7 +60,7 @@ def randper(bign):
         fx = slope * x_cross[:, 0] + intercept
         y_cross = np.where(x_cross[:, 1] >= fx, 1, -1)
         # next, add the ones
-        x_cross = np.column_stack((np.ones((crossn, 1)), x_cross))
+        x_cross = np.concatenate((np.ones((crossn, 1)), x_cross), axis=1)
         h_cross = x_cross.dot(w)
 
         yless0 = np.where(y_cross < 0.0, 1, 0)
