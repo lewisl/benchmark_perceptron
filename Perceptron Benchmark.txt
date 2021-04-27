@@ -10,6 +10,6 @@ PyNum = Python with Numpy
 
 Mac Mini, Python 2.7.8 64bit
 
-            Nim     PyPy     Cyth    Nui     CPy     PyNum
-Time        .618    .635     1.53    5.059   6.63    1:15s
-% of Cpy   9.3%    9.6%     23.1%   76.3%  100.0%    10X
+            Nim     PyPy     Cyth    Nui     CPy     PyNum   Julia
+Time        .618    .635     1.53    5.059   6.63    1:15s    .192
+% of Cpy   9.3%    9.6%     23.1%   76.3%  100.0%    10X       2.8%

@@ -1,0 +1,112 @@
+        - #= 
+        -     Simulate data for perceptron learning.
+        -     Calculate the perceptron weights.
+        -     Simulate a cross-validation data set and evaluate perceptron weights.
+        - =#
+        - 
+        - const runs = 1000  # for benchmark should be 1000
+        - 
+        - function simper(bign::Int64)
+        - 
+        -     # Declarations and initialization to set scope to function level
+ 66714008     misses::Int64 = 0
+        0     disagree::Int64 = 0
+        0     crossn::Int64 = 0
+       72     srand(1) # seed random number generator for reproducible tests
+        - 
+        0     for k = 1:runs
+        -         # create a cutting line for "true" f(x) based on 2 arbitrary points
+   216000         pa = rand(Float64,2) .* 2 .- 1
+   216000         pb = rand(Float64,2) .* 2 .- 1
+        0         slope = (pb[2] - pa[2]) / (pb[1] - pa[1])
+        0         intercept = pb[2] - pb[1] * slope
+        -         # println(k, " ", slope, " ", intercept) 
+        - 
+        -         # create the simulated dataset
+        - 
+  6176000         x = rand(bign, 2) * 2.0 - 1.0 
+   896000         y = zeros(bign) 
+   896000         h = Array(Float64,bign) # pla hypothesis
+        -         
+        0         for i = 1:bign
+        0             fx = slope * x[i, 1] + intercept
+        -             # label each sample of x with its "true" y label
+        0             y[i] = x[i, 2] >= fx ? 1 : -1
+        -         end
+        - 
+        -         # initial pla hypothesis with weights equal 0
+    80000         w = [0.0, 0.0, 0.0]
+  4369744         h = hcat(ones(bign),x) * w
+        - 
+        -         # perform pla to determine g
+        0         while true
+  6156000             misclassified = Int64[]
+176632296             for i = 1:bign
+        0                 if (y[i] < 0) != (h[i] < 0) || h[i] == 0
+  1633824                     push!(misclassified, i)  
+        -                 end
+        -             end
+        -             # println("no. misclassified: ", length(misclassified))
+        0             number_misclassified = length(misclassified)
+        0             if number_misclassified == 0
+        -                 # println("****** converged")
+        0                 break
+        -             else
+        0                 misses += 1
+        0                 if number_misclassified == 1
+        0                     pick = misclassified[1]
+        -                 else
+        0                     pick = rand(1:number_misclassified) # choose a random integer
+        -                     # println(misclassified)
+        0                     pick = misclassified[pick]
+        -                     # println("pick: ", pick)
+        -                 end
+        -                 # println("length of y: ", length(y))
+        -                 # println(y)
+        0                 w[1] += y[pick,1]
+        0                 w[2] += y[pick] * x[pick, 1]
+        0                 w[3] += y[pick] * x[pick, 2]
+        - 
+        0                 h[pick] = w[1] * 1.0 + w[2] * x[pick, 1] + w[3] * x[pick, 2] 
+        -             end
+        -         end # while true
+        - 
+        -         # cross-validation set
+        0         crossn = 10 * bign
+ 48240000         x = rand(crossn, 2) * 2.0 - 1.0
+        0         y = 0.0
+        -         # calculate hypothesis for cross validation set
+ 40376000         h = hcat(ones(crossn),x) * w
+        -         
+        0         for i = 1:crossn
+        -             # simulate a cross-validation set
+        0             fx = slope * x[i, 1] + intercept
+        0             y = x[i, 2] >= fx ? 1 : -1
+        -             # accumulate disagreements
+        0             if (y < 0) != (h[i] < 0) || h[i] == 0
+        0                 disagree += 1
+        -             end
+        -         end # for i
+        - 
+        -     end # for k...
+        - 
+        -     # calculate summary stats for the entire run
+        0     avg_iters = misses / runs
+        0     avg_disagree_pct = disagree / (runs * crossn)
+        0     @printf "%0.3f  %0.3f\n" avg_iters avg_disagree_pct
+        0     return (avg_iters, avg_disagree_pct)
+        - end  # function simper
+        - 
+        - # run it a specific number of times
+        - if length(ARGS) < 1  
+        -     simper(100)
+        - else
+        -     try
+        -         xt::Int64 = ARGS[1]
+        -     catch
+        -         println()
+        -         println("First input argument must be an integer. Exiting.")
+        -         exit(1)
+        -     end
+        -     simper(xt)
+        - end # if length
